@@ -71,11 +71,25 @@ class RsDebugRunner : RsAsyncRunner(DefaultDebugExecutor.EXECUTOR_ID, ERROR_MESS
         return true
     }
 
-    override fun checkToolchainSupported(state: CargoRunStateBase): Boolean =
-        !(CPPToolchains.getInstance().osType == OSType.WIN && "msvc" in state.rustVersion().rustc?.host.orEmpty())
+    override fun checkToolchainSupported(state: CargoRunStateBase): BuildResult.UnsupportedToolchain? {
+        // handled by `checkToolchainConfigured`
+        val toolSet = CPPToolchains.getInstance().defaultToolchain?.toolSet ?: return null
+        if (CPPToolchains.getInstance().osType == OSType.WIN) {
+            val host = state.rustVersion().rustc?.host.orEmpty()
+            val isMSVCRustToolchain = "msvc" in host
+            val isGNURustToolchain = "gnu" in host
+            val message = when {
+                isGNURustToolchain && toolSet.isMSVC -> "MSVC debugger cannot be used with GNU Rust toolchain"
+                isMSVCRustToolchain && !toolSet.isMSVC -> "GNU debugger cannot be used with MSVC Rust toolchain"
+                else -> toolSet.isDebugSupportDisabled
+            }
+            return message?.let(BuildResult::UnsupportedToolchain)
+        }
+        return null
+    }
 
-    override fun processUnsupportedToolchain(project: Project, promise: AsyncPromise<Binary?>) {
-        project.showErrorDialog("MSVC toolchain is not supported. Please use GNU toolchain.")
+    override fun processUnsupportedToolchain(project: Project, result: BuildResult.UnsupportedToolchain, promise: AsyncPromise<Binary?>) {
+        project.showErrorDialog(result.message)
         promise.setResult(null)
     }
 }

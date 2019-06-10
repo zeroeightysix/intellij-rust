@@ -42,7 +42,7 @@ abstract class RsAsyncRunner(private val executorId: String, private val errorMe
     class Binary(val path: Path)
     sealed class BuildResult {
         data class Binaries(val paths: List<String>) : BuildResult()
-        object UnsupportedToolchain : BuildResult()
+        data class UnsupportedToolchain(val message: String) : BuildResult()
     }
 
     open fun isApplicable(): Boolean = true
@@ -135,9 +135,13 @@ abstract class RsAsyncRunner(private val executorId: String, private val errorMe
 
     open fun checkToolchainConfigured(project: Project): Boolean = true
 
-    open fun checkToolchainSupported(state: CargoRunStateBase): Boolean = true
+    open fun checkToolchainSupported(state: CargoRunStateBase): BuildResult.UnsupportedToolchain? = null
 
-    open fun processUnsupportedToolchain(project: Project, promise: AsyncPromise<Binary?>) {}
+    open fun processUnsupportedToolchain(
+        project: Project,
+        result: BuildResult.UnsupportedToolchain,
+        promise: AsyncPromise<Binary?>
+    ) {}
 
     private fun buildProjectAndGetBinaryArtifactPath(
         project: Project,
@@ -168,14 +172,12 @@ abstract class RsAsyncRunner(private val executorId: String, private val errorMe
                     }
 
                     object : Task.Backgroundable(project, "Building Cargo project") {
-                        var result: RsAsyncRunner.BuildResult? = null
+                        var result: BuildResult? = null
 
                         override fun run(indicator: ProgressIndicator) {
                             indicator.isIndeterminate = true
-                            if (!checkToolchainSupported(state)) {
-                                result = BuildResult.UnsupportedToolchain
-                                return
-                            }
+                            result = checkToolchainSupported(state)
+                            if (result != null) return
 
                             val processForJson = CapturingProcessHandler(cargo.toGeneralCommandLine(command.prependArgument("--message-format=json")))
                             val output = processForJson.runProcessWithProgressIndicator(indicator)
@@ -212,16 +214,16 @@ abstract class RsAsyncRunner(private val executorId: String, private val errorMe
                                     }
                                     isSuitableTarget && (!testsOnly || profile.test)
                                 }
-                                .flatMap { it.filenames.filter { !it.endsWith(".dSYM") } } // FIXME: correctly launch binaries for macos
-                                .let(RsAsyncRunner.BuildResult::Binaries)
+                                .flatMap { it.executables }
+                                .let(BuildResult::Binaries)
                         }
 
                         override fun onSuccess() {
                             when (val result = result!!) {
-                                is RsAsyncRunner.BuildResult.UnsupportedToolchain -> {
-                                    processUnsupportedToolchain(project, promise)
+                                is BuildResult.UnsupportedToolchain -> {
+                                    processUnsupportedToolchain(project, result, promise)
                                 }
-                                is RsAsyncRunner.BuildResult.Binaries -> {
+                                is BuildResult.Binaries -> {
                                     val binaries = result.paths
                                     when {
                                         binaries.isEmpty() -> {
@@ -233,7 +235,7 @@ abstract class RsAsyncRunner(private val executorId: String, private val errorMe
                                                 "Please specify `--bin`, `--lib`, `--test` or `--example` flag explicitly.")
                                             promise.setResult(null)
                                         }
-                                        else -> promise.setResult(RsAsyncRunner.Binary(Paths.get(binaries.single())))
+                                        else -> promise.setResult(Binary(Paths.get(binaries.single())))
                                     }
                                 }
                             }
