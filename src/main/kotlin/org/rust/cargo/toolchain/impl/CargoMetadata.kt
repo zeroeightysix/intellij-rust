@@ -220,8 +220,22 @@ object CargoMetadata {
     data class Artifact(
         val target: Target,
         val profile: Profile,
-        val filenames: List<String>
+        val filenames: List<String>,
+        /**
+         * Path to executable file. Since Cargo 0.34.0
+         */
+        val executable: String?
     ) {
+
+        val executables: List<String>
+            get() {
+                return if (executable != null) {
+                    listOf(executable)
+                } else {
+                    filenames.filter { !it.endsWith(".dSYM") && !it.endsWith(".pdb") }
+                }
+            }
+
         companion object {
             fun fromJson(json: JsonObject): Artifact? {
                 if (json.getAsJsonPrimitive("reason").asString != "compiler-artifact") {
