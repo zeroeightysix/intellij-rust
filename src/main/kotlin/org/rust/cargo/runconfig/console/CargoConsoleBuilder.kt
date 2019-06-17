@@ -15,7 +15,7 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import org.rust.cargo.runconfig.test.CargoTestConsoleProperties
-import org.rust.cargo.runconfig.test.CargoTestConsoleProperties.Companion.TEST_FRAMEWORK_NAME
+import org.rust.cargo.runconfig.test.CargoTestConsolePropertiesBase.Companion.TEST_FRAMEWORK_NAME
 
 open class CargoConsoleBuilder(project: Project, scope: GlobalSearchScope) : TextConsoleBuilderImpl(project, scope) {
     override fun createConsole(): ConsoleView = CargoConsoleView(project, scope, isViewer, true)

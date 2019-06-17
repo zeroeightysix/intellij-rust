@@ -13,7 +13,7 @@ import com.intellij.execution.testframework.sm.runner.OutputToGeneralTestEventsC
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
 import com.intellij.execution.testframework.sm.runner.SMTestLocator
 
-class CargoTestConsoleProperties(
+abstract class CargoTestConsolePropertiesBase(
     config: RunConfiguration,
     executor: Executor
 ) : SMTRunnerConsoleProperties(config, TEST_FRAMEWORK_NAME, executor), SMCustomMessagesParsing {
