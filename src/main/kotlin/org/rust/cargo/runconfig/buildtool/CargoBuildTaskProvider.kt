@@ -39,9 +39,7 @@ class CargoBuildTaskProvider : BeforeRunTaskProvider<CargoBuildTaskProvider.Buil
         if (configuration !is CargoCommandConfiguration) return false
 
         val buildConfiguration = getBuildConfiguration(configuration) ?: return true
-        val buildEnvironment = createBuildEnvironment(buildConfiguration)
-            ?.also { environment.copyUserDataTo(it) }
-            ?: return false
+        val buildEnvironment = createBuildEnvironment(buildConfiguration, environment) ?: return false
         val buildableElement = CargoBuildConfiguration(buildConfiguration, buildEnvironment)
 
         val result = CompletableFuture<Boolean>()

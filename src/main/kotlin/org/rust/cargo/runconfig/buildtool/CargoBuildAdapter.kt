@@ -5,6 +5,7 @@
 
 package org.rust.cargo.runconfig.buildtool
 
+import com.intellij.build.BuildContentDescriptor
 import com.intellij.build.BuildProgressListener
 import com.intellij.build.DefaultBuildDescriptor
 import com.intellij.build.events.impl.*
@@ -28,6 +29,7 @@ import org.rust.cargo.CargoConstants
 import org.rust.cargo.runconfig.RsAnsiEscapeDecoder
 import org.rust.cargo.runconfig.RsExecutableRunner.Companion.binaries
 import org.rust.cargo.runconfig.createFilters
+import javax.swing.JComponent
 
 @Suppress("UnstableApiUsage")
 class CargoBuildAdapter(
@@ -59,6 +61,15 @@ class CargoBuildAdapter(
             .withExecutionFilters(*createFilters(context.cargoProject).toTypedArray())
             .withRestartAction(createRerunAction(context.processHandler, context.environment))
             .withRestartAction(createStopAction(context.processHandler))
+            .withContentDescriptorSupplier {
+                val activateToolWindow = context.environment.isActivateToolWindowBeforeRun
+                BuildContentDescriptor(null, null, object : JComponent() {}, "Build")
+                    .apply {
+                        isActivateToolWindowWhenAdded = activateToolWindow
+                        isActivateToolWindowWhenFailed = activateToolWindow
+                        isAutoFocusContent = activateToolWindow
+                    }
+            }
         buildProgressListener.onEvent(context.buildId, buildStarted)
     }
 

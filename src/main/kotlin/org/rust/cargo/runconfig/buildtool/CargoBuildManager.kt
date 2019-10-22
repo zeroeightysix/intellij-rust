@@ -109,7 +109,9 @@ object CargoBuildManager {
             if (!isHeadlessEnvironment) {
                 val buildToolWindow = ToolWindowManager.getInstance(project).getToolWindow(ToolWindowId.BUILD)
                 buildToolWindow?.setAvailable(true, null)
-                buildToolWindow?.show(null)
+                if (environment.isActivateToolWindowBeforeRun) {
+                    buildToolWindow?.activate(null)
+                }
             }
 
             processHandler = state.startProcess(emulateTerminal = true)
@@ -229,14 +231,20 @@ object CargoBuildManager {
         return buildConfiguration
     }
 
-    fun createBuildEnvironment(buildConfiguration: CargoCommandConfiguration): ExecutionEnvironment? {
+    fun createBuildEnvironment(
+        buildConfiguration: CargoCommandConfiguration,
+        environment: ExecutionEnvironment? = null
+    ): ExecutionEnvironment? {
         require(isBuildConfiguration(buildConfiguration))
         val project = buildConfiguration.project
         val runManager = RunManager.getInstance(project) as? RunManagerImpl ?: return null
         val executor = ExecutorRegistry.getInstance().getExecutorById(DefaultRunExecutor.EXECUTOR_ID) ?: return null
         val runner = ProgramRunner.findRunnerById(CargoCommandRunner.RUNNER_ID) ?: return null
         val settings = RunnerAndConfigurationSettingsImpl(runManager, buildConfiguration)
-        return ExecutionEnvironment(executor, runner, settings, project)
+        settings.isActivateToolWindowBeforeRun = environment.isActivateToolWindowBeforeRun
+        val buildEnvironment = ExecutionEnvironment(executor, runner, settings, project)
+        environment?.copyUserDataTo(buildEnvironment)
+        return buildEnvironment
     }
 
     fun showBuildNotification(
