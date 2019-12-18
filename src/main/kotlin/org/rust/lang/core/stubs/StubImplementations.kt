@@ -38,7 +38,7 @@ class RsFileStub : PsiFileStubImpl<RsFile> {
 
     object Type : IStubFileElementType<RsFileStub>(RsLanguage) {
         // Bump this number if Stub structure changes
-        override fun getStubVersion(): Int = 190
+        override fun getStubVersion(): Int = 191
 
         override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
             override fun createStubForFile(file: PsiFile): StubElement<*> = RsFileStub(file as RsFile)
@@ -698,7 +698,8 @@ class RsNamedFieldDeclStub(
 
 class RsAliasStub(
     parent: StubElement<*>?, elementType: IStubElementType<*, *>,
-    override val name: String?
+    override val name: String?,
+    val nameLikeText: String
 ) : StubBase<RsAlias>(parent, elementType),
     RsNamedStub {
 
@@ -706,17 +707,21 @@ class RsAliasStub(
         override fun createPsi(stub: RsAliasStub) =
             RsAliasImpl(stub, this)
 
-        override fun createStub(psi: RsAlias, parentStub: StubElement<*>?) =
-            RsAliasStub(parentStub, this, psi.name)
+        override fun createStub(psi: RsAlias, parentStub: StubElement<*>?): RsAliasStub {
+            val nameLikeElement = psi.nameIdentifier ?: psi.underscore ?: error("Alias without name: `${psi.text}`")
+            return RsAliasStub(parentStub, this, psi.name, nameLikeElement.text)
+        }
 
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
             RsAliasStub(parentStub, this,
-                dataStream.readNameAsString()
+                dataStream.readNameAsString(),
+                dataStream.readUTFFast()
             )
 
         override fun serialize(stub: RsAliasStub, dataStream: StubOutputStream) =
             with(dataStream) {
                 writeName(stub.name)
+                writeUTFFast(stub.nameLikeText)
             }
     }
 }
