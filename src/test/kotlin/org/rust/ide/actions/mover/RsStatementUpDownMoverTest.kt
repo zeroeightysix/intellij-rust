@@ -516,4 +516,36 @@ class RsStatementUpDownMoverTest : RsStatementUpDownMoverTestBase() {
             5;
         }
     """)
+
+    fun `test down comments in trait members`() = moveDown("""
+        trait T {
+            // /*caret*/first
+            // second
+            
+            fn foo() {}
+        }
+    """, """
+        trait T {
+            // second
+            // /*caret*/first
+            
+            fn foo() {}
+        }
+    """)
+
+    fun `test down comments above nested function`() = moveDown("""
+        fn foo() {
+            // /*caret*/first
+            // second
+            
+            fn bar() {}
+        }
+    """, """
+        fn foo() {
+            // second
+            // /*caret*/first
+            
+            fn bar() {}
+        }
+    """)
 }
