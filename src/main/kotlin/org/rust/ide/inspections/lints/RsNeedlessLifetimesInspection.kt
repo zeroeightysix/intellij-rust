@@ -27,7 +27,7 @@ class RsNeedlessLifetimesInspection : RsLintInspection() {
 
     override fun getLint(element: PsiElement): RsLint = RsLint.NeedlessLifetimes
 
-    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor = object : RsVisitor() {
+    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor? = object : RsVisitor() {
         override fun visitFunction(fn: RsFunction) {
             if (couldUseElision(fn)) {
                 registerProblem(holder, fn)

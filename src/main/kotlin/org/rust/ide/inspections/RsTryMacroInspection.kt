@@ -22,7 +22,7 @@ import org.rust.lang.core.psi.ext.replaceWithExpr
 class RsTryMacroInspection : RsLocalInspectionTool() {
     override fun getDisplayName() = "try! macro usage"
 
-    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean) = object : RsVisitor() {
+    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor? = object : RsVisitor() {
         override fun visitMacroCall(o: RsMacroCall) {
             val isApplicable = o.isExprOrStmtContext && o.macroName == "try" && o.exprMacroArgument?.expr != null
             if (!isApplicable) return

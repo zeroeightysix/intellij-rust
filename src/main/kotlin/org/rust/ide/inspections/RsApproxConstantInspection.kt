@@ -12,7 +12,7 @@ import org.rust.lang.core.psi.ext.RsElement
 import org.rust.lang.core.psi.kind
 
 class RsApproxConstantInspection : RsLocalInspectionTool() {
-    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean) = object : RsVisitor() {
+    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor? = object : RsVisitor() {
         override fun visitLitExpr(o: RsLitExpr) {
             val literal = o.kind
             if (literal is RsLiteralKind.Float) {

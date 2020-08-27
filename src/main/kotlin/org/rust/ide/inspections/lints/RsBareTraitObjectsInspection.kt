@@ -20,7 +20,7 @@ import org.rust.lang.core.resolve.ref.deepResolve
 class RsBareTraitObjectsInspection : RsLintInspection() {
     override fun getLint(element: PsiElement): RsLint = RsLint.BareTraitObjects
 
-    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor =
+    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor? =
         object : RsVisitor() {
             override fun visitTypeReference(typeReference: RsTypeReference) {
                 if (!typeReference.isEdition2018) return

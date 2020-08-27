@@ -20,7 +20,7 @@ import org.rust.lang.core.psi.ext.macroName
 class RsSimplifyPrintInspection : RsLocalInspectionTool() {
     override fun getDisplayName() = "println!(\"\") usage"
 
-    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean) = object : RsVisitor() {
+    override fun buildVisitor(holder: RsProblemsHolder, isOnTheFly: Boolean): RsVisitor? = object : RsVisitor() {
 
         override fun visitMacroCall(o: RsMacroCall) {
             val macroName = o.macroName
