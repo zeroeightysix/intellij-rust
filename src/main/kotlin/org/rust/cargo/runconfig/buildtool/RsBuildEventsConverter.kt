@@ -75,7 +75,7 @@ class RsBuildEventsConverter(private val context: CargoBuildContext) : BuildOutp
         val messageEvent = createMessageEvent(parentEventId, kind, message, detailedMessage, filePosition)
         if (messageEvents.add(messageEvent)) {
             if (startEvents.none { it.id == parentEventId }) {
-                handleCompilingMessage("Compiling $parentEventId", true, messageConsumer)
+                handleCompilingMessage("Compiling $parentEventId", false, messageConsumer)
             }
 
             messageConsumer.accept(messageEvent)
