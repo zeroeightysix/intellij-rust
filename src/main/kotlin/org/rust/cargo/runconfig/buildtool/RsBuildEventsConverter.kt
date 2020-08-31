@@ -64,7 +64,7 @@ class RsBuildEventsConverter(private val context: CargoBuildContext) : BuildOutp
         }
 
         val message = rustcMessage.message.trim().capitalize().trimEnd('.')
-        if (message.startsWith("Aborting due")) return true
+        if (message.startsWith("Aborting due") || message.endsWith("emitted")) return true
 
         val parentEventId = topMessage.package_id.substringBefore("(").trimEnd()
 
