@@ -89,7 +89,7 @@ class CargoBuildAdapter(
     }
 
     override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-        instantReader.append(event.text)
+        instantReader.append(event.text.replace('\r', '\n'))
     }
 
     companion object {

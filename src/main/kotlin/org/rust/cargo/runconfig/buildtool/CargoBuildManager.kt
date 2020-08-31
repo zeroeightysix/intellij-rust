@@ -35,7 +35,6 @@ import com.intellij.openapiext.isHeadlessEnvironment
 import com.intellij.openapiext.isUnitTestMode
 import com.intellij.ui.SystemNotifications
 import com.intellij.ui.content.MessageView
-import com.intellij.util.EnvironmentUtil
 import com.intellij.util.concurrency.FutureResult
 import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.text.SemVer
@@ -64,7 +63,7 @@ object CargoBuildManager {
     val CANCELED_BUILD_RESULT: Future<CargoBuildResult> =
         FutureResult(CargoBuildResult(succeeded = false, canceled = true, started = 0))
 
-    private val MIN_SHOW_PROGRESS_VERSION: SemVer = SemVer.parseFromText("1.47.0")!!
+    private val MIN_VERSION: SemVer = SemVer.parseFromText("1.47.0")!!
 
     val Project.isBuildToolWindowEnabled: Boolean
         get() {
@@ -72,7 +71,7 @@ object CargoBuildManager {
             val versions = cargoProjects.allProjects.mapNotNull { it.rustcInfo?.version }
             if (versions.any { it.channel != RustChannel.NIGHTLY }) return false
             val minVersion = versions.map { it.semver }.min() ?: return false
-            return minVersion >= MIN_SHOW_PROGRESS_VERSION
+            return minVersion >= MIN_VERSION
         }
 
     fun build(buildConfiguration: CargoBuildConfiguration): Future<CargoBuildResult> {
@@ -116,7 +115,7 @@ object CargoBuildManager {
                 buildToolWindow.show(null)
             }
 
-            processHandler = state.startProcess(useColoredProcessHandler = false, emulateTerminal = true)
+            processHandler = state.startProcess(processColors = false)
             processHandler?.addProcessListener(CargoBuildAdapter(this, buildProgressListener))
             processHandler?.startNotify()
         }
@@ -279,23 +278,27 @@ object CargoBuildManager {
     }
 
     private val cargoBuildPatch: CargoPatch = { commandLine ->
-        val additionalArguments = commandLine.additionalArguments.toMutableList()
-        additionalArguments.remove("-q")
-        additionalArguments.remove("--quiet")
-        addFormatJsonOption(
-            additionalArguments,
-            "--message-format",
-            if (SystemInfo.isUnix) "json-diagnostic-rendered-ansi" else "json"
-        )
+        val additionalArguments = mutableListOf<String>().apply {
+            addAll(commandLine.additionalArguments)
+            remove("-q")
+            remove("--quiet")
+            val format = if (SystemInfo.isUnix) "json-diagnostic-rendered-ansi" else "json"
+            addFormatJsonOption(this, "--message-format", format)
+        }
 
-        additionalArguments.add("-Zalways-show-progress")
-
+        val oldVariables = commandLine.environmentVariables
         val environmentVariables = EnvironmentVariablesData.create(
-            EnvironmentUtil.getEnvironmentMap() +
-                commandLine.environmentVariables.envs - "CI" + ("TERM" to "ansi"),
-            false
+            oldVariables.envs + mapOf(
+                "CARGO_TERM_PROGRESS_WHEN" to "always",
+                "CARGO_TERM_PROGRESS_WIDTH" to "1000"
+            ),
+            oldVariables.isPassParentEnvs
         )
-        commandLine.copy(additionalArguments = additionalArguments, environmentVariables = environmentVariables)
+
+        commandLine.copy(
+            additionalArguments = additionalArguments,
+            environmentVariables = environmentVariables
+        )
     }
 
     @TestOnly
