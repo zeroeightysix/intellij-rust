@@ -17,4 +17,5 @@ jobs:
 
             - name: Set milestone
               if: github.event.pull_request.merged && github.event.pull_request.milestone == null
-              run: python scripts/set_milestone.py --token ${{ github.token }} --pull-request ${{ github.event.pull_request.number }}
+              # token should have `repo` scope
+              run: python scripts/set_milestone.py --token ${{ secrets.WORKFLOW_GITHUB_TOKEN }} --pull-request ${{ github.event.pull_request.number }}
