@@ -39,8 +39,11 @@ class RsFormatMacroAnnotator : AnnotatorBase() {
     override fun annotateInternal(element: PsiElement, holder: AnnotationHolder) {
         val formatMacro = element as? RsMacroCall ?: return
 
-        val macroPos = macroToFormatPos(formatMacro.macroName) ?: return
         val macroArgs = formatMacro.formatMacroArgument?.formatMacroArgList ?: return
+        // panic macro handle any literal (even with `{}`) if it's single argument
+        if (formatMacro.macroName == "panic" && macroArgs.size < 2) return
+
+        val macroPos = macroToFormatPos(formatMacro.macroName) ?: return
         val macro = formatMacro.path.reference?.resolve() as? RsMacro ?: return
         if (macro.containingCrate?.origin != PackageOrigin.STDLIB) return
 
@@ -501,7 +504,8 @@ private fun macroToFormatPos(macro: String): Int? = when (macro) {
     "eprint",
     "format",
     "format_args",
-    "format_args_nl" -> 0
+    "format_args_nl",
+    "panic" -> 0
     "write",
     "writeln" -> 1
     else -> null
