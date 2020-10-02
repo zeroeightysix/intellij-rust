@@ -10,6 +10,7 @@ import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import org.rust.ide.inspections.InspectionRequirement
 import org.rust.ide.inspections.RsProblemsHolder
 import org.rust.ide.utils.skipParenExprDown
 import org.rust.lang.core.psi.*
@@ -45,7 +46,8 @@ class RsWhileTrueLoopInspection : RsLintInspection() {
                     }
                 )
             }
-
         }
     }
+
+    override val requirements: Set<InspectionRequirement> = emptySet()
 }

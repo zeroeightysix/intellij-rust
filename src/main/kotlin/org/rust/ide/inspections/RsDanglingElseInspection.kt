@@ -54,6 +54,8 @@ class RsDanglingElseInspection : RsLocalInspectionTool() {
             }
         }
 
+    override val requirements: Set<InspectionRequirement> = emptySet()
+
     private val PsiElement.rightSiblings: Sequence<PsiElement>
         get() = generateSequence(this.nextSibling) { it.nextSibling }
 }

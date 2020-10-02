@@ -34,6 +34,8 @@ class RsLiftInspection : RsLocalInspectionTool() {
         }
     }
 
+    override val requirements: Set<InspectionRequirement> = emptySet()
+
     private fun RsProblemsHolder.register(expr: RsExpr, keyword: PsiElement) {
         val keywordName = keyword.text
         registerProblem(expr, keyword.textRangeInParent,

@@ -34,6 +34,8 @@ class RsFieldInitShorthandInspection : RsLocalInspectionTool() {
         }
     }
 
+    override val requirements: Set<InspectionRequirement> = emptySet()
+
     companion object {
         fun applyShorthandInit(field: RsStructLiteralField) {
             field.expr?.delete()

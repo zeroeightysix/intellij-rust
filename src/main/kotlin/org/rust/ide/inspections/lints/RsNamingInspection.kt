@@ -8,6 +8,7 @@ package org.rust.ide.inspections.lints
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.PsiTreeUtil
+import org.rust.ide.inspections.InspectionRequirement
 import org.rust.ide.inspections.RsProblemsHolder
 import org.rust.ide.inspections.fixes.RenameFix
 import org.rust.lang.core.psi.*
@@ -23,6 +24,8 @@ abstract class RsNamingInspection(
     private val elementTitle: String = elementType
 ) : RsLintInspection() {
     override fun getDisplayName() = "$elementTitle naming convention"
+
+    override val requirements: Set<InspectionRequirement> = emptySet()
 
     fun inspect(id: PsiElement?, holder: RsProblemsHolder, fix: Boolean = true) {
         if (id == null) return

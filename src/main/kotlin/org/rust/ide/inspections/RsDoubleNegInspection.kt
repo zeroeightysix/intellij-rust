@@ -27,6 +27,8 @@ class RsDoubleNegInspection : RsLocalInspectionTool() {
             }
         }
 
+    override val requirements: Set<InspectionRequirement> = emptySet()
+
     private val RsExpr?.isNegation: Boolean
         get() = this is RsUnaryExpr && minus != null
 }
