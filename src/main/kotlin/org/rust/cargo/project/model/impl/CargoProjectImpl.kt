@@ -48,7 +48,6 @@ import org.rust.cargo.project.settings.RustProjectSettingsService
 import org.rust.cargo.project.settings.RustProjectSettingsService.RustSettingsChangedEvent
 import org.rust.cargo.project.settings.RustProjectSettingsService.RustSettingsListener
 import org.rust.cargo.project.settings.rustSettings
-import org.rust.cargo.project.settings.toolchain
 import org.rust.cargo.project.toolwindow.CargoToolWindow.Companion.initializeToolWindow
 import org.rust.cargo.project.workspace.CargoWorkspace
 import org.rust.cargo.project.workspace.PackageOrigin
@@ -329,7 +328,7 @@ open class CargoProjectsServiceImpl(
 data class CargoProjectImpl(
     override val manifest: Path,
     private val projectService: CargoProjectsServiceImpl,
-    private val rawWorkspace: CargoWorkspace? = null,
+    val rawWorkspace: CargoWorkspace? = null,
     private val stdlib: StandardLibrary? = null,
     override val rustcInfo: RustcInfo? = null,
     override val workspaceStatus: UpdateStatus = UpdateStatus.NeedsUpdate,
@@ -404,6 +403,7 @@ val CargoProjectsService.allTargets: Sequence<CargoWorkspace.Target>
 private fun hasAtLeastOneValidProject(projects: Collection<CargoProject>) =
     projects.any { it.manifest.exists() }
 
+/** Keep in sync with [org.rust.cargo.project.model.impl.deduplicateProjects] */
 private fun isExistingProject(projects: Collection<CargoProject>, manifest: Path): Boolean {
     if (projects.any { it.manifest == manifest }) return true
     return projects.mapNotNull { it.workspace }.flatMap { it.packages }

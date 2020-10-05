@@ -21,6 +21,7 @@ import org.rust.cargo.project.model.RustcInfo
 import org.rust.cargo.project.settings.rustSettings
 import org.rust.cargo.project.settings.toolchain
 import org.rust.cargo.project.workspace.CargoWorkspace
+import org.rust.cargo.project.workspace.PackageOrigin
 import org.rust.cargo.project.workspace.StandardLibrary
 import org.rust.cargo.runconfig.command.workingDirectory
 import org.rust.cargo.toolchain.RustToolchain
@@ -28,6 +29,7 @@ import org.rust.cargo.toolchain.Rustup
 import org.rust.cargo.util.DownloadResult
 import org.rust.ide.notifications.showBalloon
 import org.rust.openapiext.TaskResult
+import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
 class CargoSyncTask(
@@ -74,13 +76,32 @@ class CargoSyncTask(
                         .withWorkspace(fetchCargoWorkspace(context, indicator))
                         .withStdlib(fetchStdlib(context, indicator))
                 }
-            }
+            }.deduplicateProjects()
         }
 
         return refreshedProjects
     }
 
     data class SyncContext(val project: Project, val oldCargoProject: CargoProjectImpl, val toolchain: RustToolchain)
+}
+
+/** Keep in sync with [org.rust.cargo.project.model.impl.isExistingProject] */
+private fun List<CargoProjectImpl>.deduplicateProjects(): List<CargoProjectImpl> {
+    val projects = distinctBy { it.manifest }
+
+    val workspacePackages = mutableSetOf<Path>()
+
+    for (project in projects) {
+        val workspace = project.rawWorkspace ?: continue
+        for (pkg in workspace.packages) {
+            if (pkg.origin != PackageOrigin.WORKSPACE) continue
+            val rootDirectory = pkg.rootDirectory
+            if (rootDirectory == project.manifest.parent) continue
+            workspacePackages.add(rootDirectory)
+        }
+    }
+
+    return projects.filter { it.manifest.parent !in workspacePackages }
 }
 
 private fun fetchRustcInfo(
