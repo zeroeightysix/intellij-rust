@@ -32,6 +32,7 @@ val baseVersion = when (baseIDE) {
     "idea" -> ideaVersion
     // FIXME: 203.4203. use clionVersion
     "clion" -> if (platformVersion == 203) ideaVersion else clionVersion
+    "rider" -> riderVersion
     else -> error("Unexpected IDE name: `$baseIDE`")
 }
 
@@ -335,8 +336,8 @@ project(":clion") {
 
 project(":rider") {
     intellij {
-        version = ideaVersion
-        setPlugins(nativeDebugPlugin)
+        version = riderVersion
+//        setPlugins("rider-cpp")
     }
     dependencies {
         implementation(project(":"))
