@@ -28,6 +28,7 @@ import org.rust.cargo.project.settings.rustSettings
 import org.rust.cargo.toolchain.RsToolchainProvider
 import org.rust.cargo.toolchain.tools.rustc
 import org.rust.ide.sdk.add.RsAddSdkDialog
+import org.rust.ide.sdk.edit.RsEditLocalSdkDialog
 import org.rust.ide.sdk.remote.RsCredentialsContribution
 import org.rust.ide.sdk.remote.RsRemoteSdkAdditionalData
 import org.rust.ide.sdk.remote.RsRemoteSdkUtils.isRemoteSdk
@@ -196,7 +197,7 @@ class RsSdkDetailsDialog(
             }
         }
 
-        val dialog = RsEditSdkDialog(effectiveProject, modificator) {
+        val dialog = RsEditLocalSdkDialog(effectiveProject, modificator) {
             if (isDuplicateSdkName(it, currentSdk)) {
                 "Please specify a unique name for the toolchain"
             } else {
@@ -205,12 +206,12 @@ class RsSdkDetailsDialog(
         }
 
         if (dialog.showAndGet()) {
-            if (modificator.name != dialog.name
-                || modificator.homePath != dialog.homePath
-                || modificator.sdkAdditionalData != dialog.additionalData) {
-                modificator.name = dialog.name
-                modificator.homePath = dialog.homePath
-                modificator.sdkAdditionalData = dialog.additionalData
+            if (modificator.name != dialog.sdkName
+                || modificator.homePath != dialog.sdkHomePath
+                || modificator.sdkAdditionalData != dialog.sdkAdditionalData) {
+                modificator.name = dialog.sdkName
+                modificator.homePath = dialog.sdkHomePath
+                modificator.sdkAdditionalData = dialog.sdkAdditionalData
                 updateVersionString(modificator)
                 modifiedModificators.add(modificator)
                 sdkList.repaint()
