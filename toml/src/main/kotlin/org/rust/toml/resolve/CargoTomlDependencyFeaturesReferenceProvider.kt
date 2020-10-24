@@ -25,6 +25,8 @@ import org.toml.lang.psi.ext.kind
  * features = ["baz"]
  *             #^ Provides a reference for "baz"
  * ```
+ *
+ * @see [org.rust.toml.completion.CargoTomlDependencyFeaturesCompletionProvider]
  */
 class CargoTomlDependencyFeaturesReferenceProvider : PsiReferenceProvider() {
     override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
