@@ -40,6 +40,14 @@ interface RsSdkFlavor {
             && sdkPath.hasExecutable(Cargo.NAME)
     }
 
+    fun Path.hasExecutable(toolName: String): Boolean =
+        pathToExecutable(toolName).isExecutable()
+
+    private fun Path.pathToExecutable(toolName: String): Path {
+        val exeName = if (SystemInfo.isWindows) "$toolName.exe" else toolName
+        return resolve(exeName).toAbsolutePath()
+    }
+
     companion object {
         @JvmField
         val EP_NAME: ExtensionPointName<RsSdkFlavor> = ExtensionPointName.create("org.rust.sdkFlavor")
@@ -51,15 +59,6 @@ interface RsSdkFlavor {
         fun getFlavor(sdkPath: Path?): RsSdkFlavor? {
             if (sdkPath == null) return null
             return getApplicableFlavors().find { flavor -> flavor.isValidSdkPath(sdkPath) }
-        }
-
-        // TODO: Move?
-        @JvmStatic
-        fun Path.hasExecutable(toolName: String): Boolean = pathToExecutable(toolName).isExecutable()
-
-        private fun Path.pathToExecutable(toolName: String): Path {
-            val exeName = if (SystemInfo.isWindows) "$toolName.exe" else toolName
-            return resolve(exeName).toAbsolutePath()
         }
     }
 }

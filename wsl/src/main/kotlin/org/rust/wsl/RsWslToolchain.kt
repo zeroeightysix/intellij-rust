@@ -11,15 +11,15 @@ import com.intellij.execution.wsl.WSLDistribution
 import org.rust.cargo.toolchain.RsToolchain
 import org.rust.cargo.toolchain.RsToolchainProvider
 import org.rust.stdext.toPath
-import org.rust.wsl.sdk.RsWslCredentialsType
 import java.io.File
 import java.nio.file.Path
 
 object RsWslToolchainProvider : RsToolchainProvider {
-    override fun isApplicable(homePath: String): Boolean = RsWslCredentialsType.hasPrefix(homePath)
+    override fun isApplicable(homePath: String): Boolean =
+        homePath.startsWith(WSLDistribution.UNC_PREFIX)
 
     override fun getToolchain(homePath: String, toolchainName: String?): RsToolchain? {
-        val (wslPath, distribution) = parseSdkHomePath(homePath) ?: return null
+        val (wslPath, distribution) = parseUncPath(homePath) ?: return null
         return RsWslToolchain(wslPath.toPath(), toolchainName, distribution)
     }
 }

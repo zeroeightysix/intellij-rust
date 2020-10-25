@@ -5,12 +5,10 @@
 
 package org.rust.wsl.sdk.add
 
-import com.intellij.execution.wsl.WSLUtil
 import com.intellij.openapi.projectRoots.Sdk
 import org.rust.ide.sdk.add.RsAddSdkPanel
 import org.rust.ide.sdk.add.RsAddSdkProvider
 
 class RsAddWslSdkProvider : RsAddSdkProvider {
-    override fun createView(existingSdks: List<Sdk>): RsAddSdkPanel? =
-        if (WSLUtil.isSystemCompatible()) RsAddWslSdkPanel(existingSdks) else null
+    override fun createPanel(existingSdks: List<Sdk>): RsAddSdkPanel? = null
 }

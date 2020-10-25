@@ -4,7 +4,9 @@
         <addSdkProvider implementation="org.rust.wsl.sdk.add.RsAddWslSdkProvider"/>
         <editSdkProvider implementation="org.rust.wsl.sdk.edit.RsEditWslSdkProvider"/>
         <sdkValidator implementation="org.rust.wsl.sdk.RsWslSdkValidator"/>
-        <sdkFlavor implementation="org.rust.wsl.sdk.RsWslSdkFlavor"/>
+        <sdkFlavor implementation="org.rust.wsl.sdk.flavor.RustupWslSdkFlavor"/>
+        <sdkFlavor implementation="org.rust.wsl.sdk.flavor.UnixWslSdkFlavor"/>
+        <sdkFlavor implementation="org.rust.wsl.sdk.flavor.SystemPathWslSdkFlavor"/>
     </extensions>
     <extensions defaultExtensionNs="com.intellij">
         <remote.credentialsType implementation="org.rust.wsl.sdk.RsWslCredentialsType"/>

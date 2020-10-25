@@ -5,13 +5,13 @@
 
 package org.rust.wsl.sdk
 
+import com.intellij.execution.wsl.WSLDistribution
 import com.intellij.remote.ext.RemoteCredentialsHandlerBase
 import org.jdom.Element
-import org.rust.wsl.WSL_CREDENTIALS_PREFIX
 
 class RsWslCredentialsHandler(credentials: RsWslCredentialsHolder) : RemoteCredentialsHandlerBase<RsWslCredentialsHolder>(credentials) {
 
-    override fun getId(): String = WSL_CREDENTIALS_PREFIX + credentials.distributionId
+    override fun getId(): String = WSLDistribution.UNC_PREFIX + credentials.distributionId
 
     override fun save(rootElement: Element) {
         credentials.save(rootElement)
