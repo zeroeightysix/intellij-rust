@@ -8,11 +8,14 @@ package org.rust.wsl
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.wsl.WSLDistribution
+import com.intellij.util.io.exists
+import com.intellij.util.io.isFile
 import org.rust.cargo.toolchain.RsToolchain
 import org.rust.cargo.toolchain.RsToolchainProvider
 import org.rust.stdext.toPath
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.Paths
 
 object RsWslToolchainProvider : RsToolchainProvider {
     override fun isApplicable(homePath: String): Boolean =
@@ -62,4 +65,23 @@ class RsWslToolchain(
     override fun expandUserHome(remotePath: String): String = distribution.expandUserHome(remotePath)
 
     override fun getExecutableName(toolName: String): String = toolName
+
+    override fun pathToExecutable(toolName: String): Path {
+        val uncLocation = distribution.toUncPath(location.toString())
+        val exeName = getExecutableName(toolName)
+        return Paths.get(uncLocation, exeName).toAbsolutePath()
+    }
+
+    override fun pathToCargoExecutable(toolName: String): Path {
+        val exePath = pathToExecutable(toolName)
+        if (exePath.exists()) return exePath
+        val cargoBin = expandUserHome("~/.cargo/bin")
+        val toUncPath = distribution.toUncPath(cargoBin)
+        val exeName = getExecutableName(toolName)
+        return Paths.get(toUncPath, exeName).toAbsolutePath()
+    }
+
+    override fun hasExecutable(exec: String): Boolean = pathToExecutable(exec).isFile()
+
+    override fun hasCargoExecutable(exec: String): Boolean = pathToCargoExecutable(exec).isFile()
 }

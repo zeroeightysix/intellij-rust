@@ -15,7 +15,6 @@ import org.rust.cargo.toolchain.RsToolchain
 import org.rust.cargo.toolchain.RsToolchainProvider
 import org.rust.cargo.toolchain.tools.rustup
 import org.rust.ide.sdk.flavors.RsSdkFlavor
-import org.rust.ide.sdk.flavors.RustupSdkFlavor
 import org.rust.ide.sdk.flavors.suggestHomePaths
 import org.rust.openapiext.computeWithCancelableProgress
 import org.rust.stdext.toPath
@@ -49,11 +48,10 @@ object RsSdkUtils {
 
     fun findSdkByKey(key: String): Sdk? = getAllRustSdks().find { it.key == key }
 
-    fun detectRustSdks(existingSdks: List<Sdk>): List<RsDetectedSdk> {
-        val existingPaths = existingSdks
-            .mapNotNull { it.homePath?.toPath() }
-            .filterNot { RustupSdkFlavor.isValidSdkPath(it) }
+    fun detectRustSdks(existingSdks: List<Sdk>, localOnly: Boolean = false): List<RsDetectedSdk> {
+        val existingPaths = existingSdks.mapNotNull { it.homePath?.toPath() }
         return RsSdkFlavor.getApplicableFlavors().asSequence()
+            .filter { localOnly || !it.isRemote() }
             .flatMap { it.suggestHomePaths().asSequence() }
             .map { it.toAbsolutePath() }
             .distinct()

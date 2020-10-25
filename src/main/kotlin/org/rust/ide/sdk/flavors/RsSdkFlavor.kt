@@ -26,6 +26,8 @@ interface RsSdkFlavor {
      */
     fun isApplicable(): Boolean = true
 
+    fun isRemote(): Boolean = false
+
     fun getHomePathCandidates(): List<Path>
 
     /**
