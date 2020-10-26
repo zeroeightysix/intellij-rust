@@ -413,9 +413,9 @@ project(":grazie") {
 }
 
 project(":wsl") {
-//    intellij {
-//        setPlugins("WSL")
-//    }
+    intellij {
+        setPlugins("WSL")
+    }
     dependencies {
         implementation(project(":"))
         implementation(project(":common"))

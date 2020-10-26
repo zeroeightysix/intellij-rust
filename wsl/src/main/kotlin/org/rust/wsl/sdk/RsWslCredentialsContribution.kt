@@ -11,7 +11,7 @@ import org.rust.ide.sdk.remote.RsCredentialsContribution
 
 class RsWslCredentialsContribution : CredentialsLanguageContribution<RsCredentialsContribution>(),
                                      RsCredentialsContribution {
-    override fun getType(): CredentialsType<*> = RsWslCredentialsType.getInstance()
+    override fun getType(): CredentialsType<*> = RsWslCredentialsType
     override fun getLanguageContributionClass() = RsCredentialsContribution::class.java
     override fun getLanguageContribution() = this
 }

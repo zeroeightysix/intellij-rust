@@ -48,10 +48,13 @@ object RsSdkUtils {
 
     fun findSdkByKey(key: String): Sdk? = getAllRustSdks().find { it.key == key }
 
-    fun detectRustSdks(existingSdks: List<Sdk>, localOnly: Boolean = false): List<RsDetectedSdk> {
+    fun detectRustSdks(
+        existingSdks: List<Sdk>,
+        flavorFilter: (RsSdkFlavor) -> Boolean = { true }
+    ): List<RsDetectedSdk> {
         val existingPaths = existingSdks.mapNotNull { it.homePath?.toPath() }
         return RsSdkFlavor.getApplicableFlavors().asSequence()
-            .filter { localOnly || !it.isRemote() }
+            .filter(flavorFilter)
             .flatMap { it.suggestHomePaths().asSequence() }
             .map { it.toAbsolutePath() }
             .distinct()
@@ -72,6 +75,7 @@ object RsSdkUtils {
         return SdkConfigurationUtil.createAndAddSDK(homePath, RsSdkType.getInstance())
     }
 
+    // TODO: provide remote SDK additional data
     fun createRustSdkAdditionalData(homePath: String): RsSdkAdditionalData? {
         val data = RsSdkAdditionalData()
         val toolchain = RsToolchainProvider.getToolchain(homePath, null) ?: return null
