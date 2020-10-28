@@ -100,6 +100,7 @@ class FileTree(val rootDirectory: Entry.Directory) {
                             "Symlinks are available only in LocalFileSystem"
                         }
                         Files.createSymbolicLink(root.pathAsPath.resolve(name), root.pathAsPath.resolve(entry.targetPath))
+                            .also { check(Files.isSymbolicLink(it)) { "Symlink is not created" } }
                         Unit
                     }
                 }.exhaustive
